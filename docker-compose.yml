@@ -1,0 +1,7 @@
+version: "3"
+services:
+  sgm_datacube:
+    build: .
+    ports:
+      - "8093:8000"
+    restart: always
