@@ -1,8 +1,9 @@
 from typing import Annotated
 from fastapi import FastAPI, Request, Form
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from .stac import search_microsoft, search_roscosmos
+from .stac import search_microsoft, search_roscosmos, search_sentinel
 from .api import router
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,6 +51,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(router)
 templates = Jinja2Templates(directory="app/templates")
@@ -57,6 +59,24 @@ templates = Jinja2Templates(directory="app/templates")
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={})
+
+@app.get("/sentinel")
+async def sentinel():
+    bbox = [131.8710583 - 0.5, 43.1665574 - 0.5, 131.8710583 + 0.5, 43.1665574 + 0.5]
+    time_range = f"2025-11-01/2025-11-24"
+    return search_sentinel(bbox, time_range)
+
+@app.get("/sentinel_html", response_class=HTMLResponse)
+async def sentinel(request: Request):
+    bbox = [131.8710583 - 0.5, 43.1665574 - 0.5, 131.8710583 + 0.5, 43.1665574 + 0.5]
+    time_range = f"2025-11-01/2025-11-24"
+    items = search_sentinel(bbox, time_range)
+    return templates.TemplateResponse(request=request, name="search_results.html", context={"items": items, "count": len(items)})
+
+
+@app.get("/app", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse(request=request, name="main.html", context={})
 
 @app.get("/collections", response_class=HTMLResponse)
 async def collections(request: Request):

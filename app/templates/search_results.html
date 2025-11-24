@@ -1,0 +1,33 @@
+ <div class="space-y-4">
+    {% if items %}
+        <span id="item-count" hx-swap-oob="true" class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">{{ count }}</span>
+        
+        {% for item in items %}
+            <div class="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100">
+                <div class="relative">
+                    <img src="{{ item.url }}" alt="Result" class="w-full h-32 object-cover">
+                    <div class="absolute top-2 left-2 bg-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+                        <span>📅</span>
+                        <span>{{ item.date }}</span>
+                    </div>
+                    <div class="absolute top-2 right-2 flex flex-col gap-1">
+                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>i</span></button>
+                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>👁️</span></button>
+                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>🎯</span></button>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}    
+        
+    {% else %}
+        <div class="space-y-3">
+        <div class="p-3 bg-gray-50 rounded-lg text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">Нет результатов</span>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    
+    
+</div>
