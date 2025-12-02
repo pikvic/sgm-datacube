@@ -1,21 +1,144 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Сервис спутниковых данных</title>
+     <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#1e40af'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="container max-w-screen-xl mx-auto px-4">
+        <div class="mx-auto px-4 py-8">
+            <!-- Заголовок -->
+            <h1 class="text-4xl font-bold text-center text-gray-900 py-12">
+                Сервис спутниковых данных
+            </h1>
 
-{% block title %}
-    Index
-{% endblock title %}
+            <!-- Описание -->
+            <p class="text-lg text-center text-gray-600 max-w-3xl mx-auto">
+                Сервис по поиску, обработке и визуализации спутниковых данных на основе технологий:
+            </p>
+            <ul class="list-none text-lg text-center text-gray-600 max-w-3xl mx-auto mb-8">
+                <li>ODC (OpenDataCube)</li>
+                <li>GeoAI (Geospatial Artificial Intelligence)</li>
+                <li>STAC (Spatio-Temporal Asset Catalog)</li>
+                <li>COG (Cloud-Optimized GeoTIFF)</li>
+            </ul>
 
-{% block content %}
-    <div class="container">
+                
+            <p class="text-lg text-center text-red-600 max-w-3xl mx-auto mb-16">
+                Сервис работает в тестовом режиме и дорабатывается!
+            </p>
+            
 
-        <div class="row">
-            <div class="col">
-                <h1>Доступ к спутниковым данным</h1>
+            <!-- Фичи -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+                <div class="flex flex-col items-center text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-blue-100 p-4 rounded-full mb-4">
+                        <img src="/static/search.png" class="size-8">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                        Поиск данных
+                    </h3>
+                    <p class="text-gray-600 text-justify">
+                        Задавайте географический регион интереса, интервал дат и получайте спутниковые данные по запросу из источников по всему миру
+                    </p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-green-100 p-4 rounded-full mb-4">
+                        <img src="/static/process.png" class="size-8">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                        Обработка данных
+                    </h3>
+                    <p class="text-gray-600 text-justify">
+                        Алгоритмы обработки спутниковых данных для решения типовых и специализированных геологических задач, в том числе с использованием искусственного интеллекта
+                    </p>
+                </div>
+                
+                <div class="flex flex-col items-center text-center p-6 bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                    <div class="bg-amber-100 p-4 rounded-full mb-4">
+                        <img src="/static/visualize.png" class="size-8">
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">
+                        Визуализация данных
+                    </h3>
+                    <p class="text-gray-600 text-justify">
+                        Возможность настроить отображение спутниковых данных и результатов их обработки под задачу 
+                    </p>
+                </div>
+            </div>
+
+
+            <!-- Заголовок -->
+            <h2 class="text-2xl font-bold text-center text-gray-900 py-12">
+                Каталог данных
+            </h2>
+
+            <p class="text-lg text-center text-gray-600 max-w-3xl mx-auto mb-16">
+                Доступ к спутниковым данным по всему миру от космических агентств и геологических служб.
+            </p>
+
+            <!-- Карточки продуктов -->
+            <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-8 mb-20">
+
+                <!-- Task Card 1 -->
+                <div class="flex items-center gap-6 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                    <img src="/static/landsat.png" class="w-64 h-40 object-cover rounded-md">
+                    <div class="flex-1">
+                        <a href="/search"><h2 class="text-xl font-semibold text-blue-700 mb-2">Спутники серии Landsat</h2></a>
+                        <p class="text-gray-700 mb-4 text-justify">
+                        Данные Landsat - ключевой инструмент для региональной геологии и разведки. Они идеально подходят для картирования пород и выявления тектонических структур,
+                        поиска зон гидротермальных изменений (околорудных ореолов) по глинистым минералам и окислам железа,
+                        мониторинга динамики карьеров, отвалов и последствий природных процессов.
+                        Это бесплатный 50-летний архив с оптимальным разрешением для анализа огромных территорий, что позволяет эффективно планировать полевые работы.
+                        <br>
+                        <span class="font-bold">Данные предоставлены USGS.</span>
+                        </p>
+                    </div>
+                </div>
+                <!-- Task Card 2 -->
+                <div class="flex items-center gap-6 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition cursor-pointer">
+                    <img src="/static/sentinel-2.png" class="w-64 h-40 object-cover rounded-md">
+                    <div class="flex-1">
+                        <a href="/search"><h2 class="text-xl font-semibold text-blue-700 mb-2">Спутник Sentinel-2</h2></a>
+                        <p class="text-gray-700 mb-4 text-justify">
+                        Sentinel-2 - инструмент для детального и оперативного геологического мониторинга. Он идеально подходит для детального картирования структур (разломов, складок) благодаря разрешению 10 м,
+                        более точной минералогической диагностики за счет большего числа спектральных каналов (включая важные для геологии SWIR-каналы с Sentinel-2B), мониторинга быстротекущих процессов: карьерные разработки, динамика отвалов, последствия оползней, состояние рекультивации.
+                        <br>
+                        Ключевое преимущество: Высокая детальность (10-20 м) и частота съемки (раз в 5 дней на экваторе) в сочетании с бесплатным доступом. Идеально дополняет Landsat для более детальных исследований.
+                        <br>
+                        <span class="font-bold">Данные предоставлены ESA.</span>
+                        </p>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col"><a href="/collections">К коллекциям</a></div>
-        </div>
-    
-
     </div>
-{% endblock content %}
+    <!-- Футер -->
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="max-w-6xl mx-auto px-4 text-center">
+            <p>© 2017 - 2025 Государственный геологический музей им. В.И. Вернадского РАН</p>
+            <p>Автор - Загумённов А.А., ГГМ РАН</p>
+        </div>
+    </footer>
+    
+</body>
+</html>

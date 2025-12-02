@@ -1,107 +1,76 @@
 from typing import Annotated
-from fastapi import FastAPI, Request, Form
+
+from fastapi import FastAPI, Request, Form, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from .stac import search_microsoft, search_roscosmos, search_sentinel
-from .api import router
+
+from .stac import search_microsoft
+
 
 from fastapi.middleware.cors import CORSMiddleware
-
-COLLECTIONS = [
-    {
-        "name": "landsat-c2-l2",
-        "description": "Landsat Collection 2 Level-2 Science Products, consisting of atmospherically corrected surface reflectance and surface temperature image data. Collection 2 Level-2 Science Products are available from August 22, 1982 to present. This dataset represents the global archive of Level-2 data from Landsat Collection 2 acquired by the Thematic Mapper onboard Landsat 4 and 5, the Enhanced Thematic Mapper onboard Landsat 7, and the Operatational Land Imager and Thermal Infrared Sensor onboard Landsat 8 and 9. Images are stored in cloud-optimized GeoTIFF format.",
-        "source": "Microsoft Planetary Computer",
-        "provider": "NASA, USGS",
-        "search": search_microsoft
-    },
-    {
-        "name": "modis-09A1-061",
-        "description": "The Moderate Resolution Imaging Spectroradiometer (MODIS) 09A1 Version 6.1 product provides an estimate of the surface spectral reflectance of MODIS Bands 1 through 7 corrected for atmospheric conditions such as gasses, aerosols, and Rayleigh scattering. Along with the seven 500 meter (m) reflectance bands are two quality layers and four observation bands. For each pixel, a value is selected from all the acquisitions within the 8-day composite period. The criteria for the pixel choice include cloud and solar zenith. When several acquisitions meet the criteria the pixel with the minimum channel 3 (blue) value is used.",
-        "source": "Microsoft Planetary Computer",
-        "provider": "NASA LP DAAC at the USGS EROS Center",
-        "search": search_microsoft
-    },
-    {
-        "name": "roscosmos-opendata.MM",
-        "description": "Глобальные мозайки. Солнечно-синхронная метеорологическая космическая система Метеор-М. По состоянию на 2025 год состоит из двух космических аппаратов. Радиометр МСУ-МР производит непрерывное сканирование.",
-        "source": "Роскосмос",
-        "provider": "Роскосмос",
-        "search": search_roscosmos
-    },
-    
-]
 
 
 app = FastAPI()
 
 origins = [
-    "http://localhost.tiangolo.com",
-    "https://localhost.tiangolo.com",
+    "http://datacube.geologyscience.ru",
+    "https://datacube.geologyscience.ru",
+    "https://localhost",
     "http://localhost",
-    "http://localhost:8001",
+    "http://localhost:8000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-
-app.include_router(router)
+app.mount("/assets", StaticFiles(directory="app/templates/map/assets"), name="assets")
 templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={})
 
-@app.get("/sentinel")
-async def sentinel():
-    bbox = [131.8710583 - 0.5, 43.1665574 - 0.5, 131.8710583 + 0.5, 43.1665574 + 0.5]
-    time_range = f"2025-11-01/2025-11-24"
-    return search_sentinel(bbox, time_range)
-
-@app.get("/sentinel_html", response_class=HTMLResponse)
-async def sentinel(request: Request):
-    bbox = [131.8710583 - 0.5, 43.1665574 - 0.5, 131.8710583 + 0.5, 43.1665574 + 0.5]
-    time_range = f"2025-11-01/2025-11-24"
-    items = search_sentinel(bbox, time_range)
-    return templates.TemplateResponse(request=request, name="search_results.html", context={"items": items, "count": len(items)})
+@app.get("/search/landsat", response_class=HTMLResponse)
+async def landsat(request: Request):
+    return templates.TemplateResponse(request=request, name="search.html", context={"satellite": "landsat", "collection": "landsat-c2-l2"})
 
 
-@app.get("/app", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse(request=request, name="main.html", context={})
+@app.get("/search", response_class=HTMLResponse)
+async def search_get(request: Request):
+    return templates.TemplateResponse(request=request, name="map/index.html")
 
-@app.get("/collections", response_class=HTMLResponse)
-async def collections(request: Request):
-
-    return templates.TemplateResponse(request=request, name="collections.html", context={"collections": COLLECTIONS})
-
-@app.get("/collections/{name}", response_class=HTMLResponse)
-async def collection(name, request: Request):
-    collection = [col for col in COLLECTIONS if col["name"] == name][0]
-    return templates.TemplateResponse(request=request, name="collection.html", context={"collection": collection})
-
-@app.post("/collections/{name}/results", response_class=HTMLResponse)
+@app.post("/search", response_class=HTMLResponse)
 async def search(
-    name: str, 
-    start: Annotated[str, Form()], 
-    end: Annotated[str, Form()], 
-    lat1: Annotated[str, Form()], 
-    lat2: Annotated[str, Form()], 
-    lon1: Annotated[str, Form()],
-    lon2: Annotated[str, Form()],
-    request: Request
+    request: Request, 
+    satellite: Annotated[str, Form()],
+    min_lat: Annotated[str, Form()], 
+    max_lat: Annotated[str, Form()], 
+    min_lon: Annotated[str, Form()], 
+    max_lon: Annotated[str, Form()],
+    start_date: Annotated[str, Form()],
+    end_date: Annotated[str, Form()],
 ):
-    bbox = [lon1, lat1, lon2, lat2]
-    time_range = f"{start}/{end}"
-    collection = [col for col in COLLECTIONS if col["name"] == name][0]
-    results = collection["search"](name, bbox=bbox, time_range=time_range)
-    return templates.TemplateResponse(request=request, name="results.html", context={"name": name, "results": results})
+    print(request)
+    if satellite.lower() == "landsat":
+        collection = 'landsat-c2-l2'
+        bbox = [min_lon, min_lat, max_lon, max_lat]
+        time_range = f"{start_date}/{end_date}"
+        items = search_microsoft(collection, bbox, time_range)
+    elif satellite.lower() == "sentinel-2":
+        collection = 'sentinel-2-l2a'
+        bbox = [min_lon, min_lat, max_lon, max_lat]
+        time_range = f"{start_date}/{end_date}"
+        items = search_microsoft(collection, bbox, time_range)
+
+    else:
+        items = []
+
+    return templates.TemplateResponse(request=request, name="search_results.html", context={"items": items, "count": len(items)})
 

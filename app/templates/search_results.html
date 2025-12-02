@@ -3,17 +3,20 @@
         <span id="item-count" hx-swap-oob="true" class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm">{{ count }}</span>
         
         {% for item in items %}
-            <div class="bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100">
+            <div class="item bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100"
+            data-bbox="{{ item.bbox }}"
+            data-url="{{ item.url }}"
+            >
                 <div class="relative">
                     <img src="{{ item.url }}" alt="Result" class="w-full h-32 object-cover">
                     <div class="absolute top-2 left-2 bg-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
                         <span>📅</span>
                         <span>{{ item.date }}</span>
+                        
                     </div>
-                    <div class="absolute top-2 right-2 flex flex-col gap-1">
-                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>i</span></button>
-                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>👁️</span></button>
-                        <button class="bg-black/70 text-white p-1.5 rounded-full hover:bg-black"><span>🎯</span></button>
+                    <div class="absolute top-2 right-2 bg-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+                        <span>⏰</span>
+                        <span>{{ item.time }}</span>
                     </div>
                 </div>
             </div>
