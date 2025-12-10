@@ -6,11 +6,39 @@ import VectorSource from 'ol/source/Vector.js';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import {transform, transformExtent} from 'ol/proj.js'
+import {register} from 'ol/proj/proj4.js';
 import Static from 'ol/source/ImageStatic.js';
 import ImageLayer from 'ol/layer/Image.js';
 import {getCenter} from 'ol/extent.js';
 import { fromExtent } from 'ol/geom/Polygon';
 import {easeOut} from 'ol/easing.js'
+import STAC from 'ol-stac';
+import proj4 from 'proj4';
+import SourceType from 'ol-stac/source/type.js';
+
+register(proj4); 
+
+async function sign(href) {
+  const params = new URLSearchParams({href});
+  const response = await fetch(
+    `https://planetarycomputer.microsoft.com/api/sas/v1/sign?${params}`,
+  );
+  const body = await response.json();
+  return body.href;
+}
+
+// const layer = new STAC({
+//   url: 'https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a/items/S2B_MSIL2A_20220909T185929_R013_T10TES_20220910T222807',
+//   assets: ['visual'],
+//   async getSourceOptions(type, options) {
+//     if (type === SourceType.GeoTIFF) {
+//       for (const source of options.sources) {
+//         source.url = await sign(source.url);
+//       }
+//     }
+//     return options;
+//   },
+// });
 
 const osm =  new TileLayer({
       source: new OSM()
@@ -103,7 +131,7 @@ function addDrawInteraction() {
 }
 // Button to start drawing
 document.getElementById('button_draw').addEventListener('click', function() {
-        addDrawInteraction();
+  addDrawInteraction();
 });    
 
 
@@ -116,6 +144,8 @@ let previewLayer = null;
 function showSnapshotPreview(snapshot) {
   const bbox = snapshot.getAttribute("data-bbox");
   const url = snapshot.getAttribute("data-url");
+  const stac_url = snapshot.getAttribute("data-stac_item");
+  const assets = snapshot.getAttribute("data-assets");
   const element_extent = JSON.parse(bbox);
     // Удаляем предыдущее превью, если есть
     if (previewLayer) {
@@ -129,16 +159,30 @@ function showSnapshotPreview(snapshot) {
         'EPSG:3857'
     );
     
-    // Создаем слой со статическим изображением
-    previewLayer = new ImageLayer({
-        source: new Static({
-            url: url,
-            imageExtent: extent,
-            projection: 'EPSG:3857'
-        }),
-        opacity: 1
-    });
+    // // Создаем слой со статическим изображением
+    // previewLayer = new ImageLayer({
+    //     source: new Static({
+    //         url: url,
+    //         imageExtent: extent,
+    //         projection: 'EPSG:3857'
+    //     }),
+    //     opacity: 1
+    // });
     
+    previewLayer = new STAC({
+      url: stac_url,
+      assets: JSON.parse(assets),
+      async getSourceOptions(type, options) {
+        if (type === SourceType.GeoTIFF) {
+          for (const source of options.sources) {
+            source.url = await sign(source.url);
+          }
+        }
+        return options;
+      },
+    });
+
+
     // Добавляем слой на карту
     map.addLayer(previewLayer);
     
@@ -151,6 +195,12 @@ function showSnapshotPreview(snapshot) {
         duration: 1000,
         easing: easeOut
     });
+
+    // view.fit(previewLayer.getExtent(), {
+    //     padding: [100, 100, 100, 100],
+    //     duration: 1000,
+    //     easing: easeOut
+    // });
     // // Также можно приблизить к экстенту снимка
     // view.animate({
     //     resolution: view.getResolutionForExtent(extent) * 1.1,
