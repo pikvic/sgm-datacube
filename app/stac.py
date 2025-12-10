@@ -1,6 +1,14 @@
 import pystac_client
 import planetary_computer
+import json
 
+def get_assets(collection):
+    if collection == "landsat-c2-l2":
+        return ["red", "green", "blue"]
+    elif collection == "sentinel-2-l2a":
+        return ["visual"]
+    else:
+        return ["visual"]
 
 def search_microsoft(collection, bbox, time_range):
     catalog = pystac_client.Client.open(
@@ -10,6 +18,7 @@ def search_microsoft(collection, bbox, time_range):
     search = catalog.search(collections=[collection], bbox=bbox, datetime=time_range)
     items = search.item_collection()
     result = []
+    
     for item in items:
         data = {
             "id": item.id,
@@ -18,6 +27,8 @@ def search_microsoft(collection, bbox, time_range):
             "url": [a.href for a in item.assets.values() if a.media_type == "image/png"][0],
             "geometry": item.geometry,
             "bbox": item.bbox,
+            "assets": json.dumps(get_assets(collection)),
+            "stac_item": item.self_href
         }
         result.append(data)
     return result
